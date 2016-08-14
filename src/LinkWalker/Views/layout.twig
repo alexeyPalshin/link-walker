@@ -18,6 +18,15 @@
     (function ($) {
         $('#begin-to-crawl').on('click', function (e) {
             e.preventDefault();
+            let link = $('#link').val();
+
+            $.ajax({
+                url: "/crawl/" + link,
+                method: "POST",
+            })
+              .done(function (msg) {
+//                alert(msg);
+            });
         });
     })(jQuery);
 </script>

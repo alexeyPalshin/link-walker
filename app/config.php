@@ -7,8 +7,15 @@
  */
 
 use function DI\object;
+use Interop\Container\ContainerInterface;
 
 return [
+    'documentVersion'  => '1.0',
+    'documentEncoding' => 'UTF-8',
+    DOMDocument::class => function (ContainerInterface $c) {
+        return new DOMDocument($c->get('documentVersion'), $c->get('documentEncoding'));
+    },
+
     // Configure Twig
     Twig_Environment::class => function () {
         $loader = new Twig_Loader_Filesystem(__DIR__ . '/../src/LinkWalker/Views');
