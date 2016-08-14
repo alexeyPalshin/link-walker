@@ -1,0 +1,23 @@
+{
+    "name": "palshin/link-walker",
+    "description": "web crawler with GUI",
+    "authors": [
+        {
+            "name": "Alexey Palshin",
+            "email": "mykorespondencia@gmail.com"
+        }
+    ],
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "LinkWalker\\": "src/LinkWalker/",
+            "Crawler\\": "src/Crawler/"
+        }
+    },
+    "require": {
+        "php-di/php-di": "^5.3",
+        "nikic/fast-route": "^1.0",
+        "twig/twig": "~1.0",
+        "kriswallsmith/assetic": "^1.3"
+    }
+}
