@@ -5,7 +5,10 @@ namespace Crawler\Controller;
 
 
 use Crawler\CrawlerInterface;
+use GuzzleHttp\Client;
 use DOMDocument;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\BadResponseException;
 
 class CrawlerController implements CrawlerInterface
 {
@@ -19,9 +22,10 @@ class CrawlerController implements CrawlerInterface
      */
     private $pageLinks;
 
-    public function __construct(DOMDocument $dom)
+    public function __construct(DOMDocument $dom, Client $client)
     {
         $this->dom = $dom;
+        $this->client = $client;
     }
 
     /**
@@ -37,12 +41,12 @@ class CrawlerController implements CrawlerInterface
             $links = $this->dom->getElementsByTagName('a');
             foreach ($links as $link) {
                 if($this->startsWith($link->getAttribute('href'), 'http')){
-                    var_dump($link->getAttribute('href'));
+//                    var_dump($link->getAttribute('href'));
                 }
                 $this->pageLinks[] = $link->getAttribute('href');
             }
         }
-//var_dump($this->pageLinks);
+
         echo $this->getPageLinks();
     }
 
@@ -56,12 +60,33 @@ class CrawlerController implements CrawlerInterface
     {
         $url = filter_var($url, FILTER_SANITIZE_URL);
         $regex = "/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i";
+        $status = $this->getResponseStatus($url);
 
         if (filter_var($url, FILTER_VALIDATE_URL) === false || !preg_match($regex, $url)) {
             echo 'bad uri';
+        } elseif($status != 200) {
+            echo 'bad uri status';
         } else {
             return $url;
         }
+    }
+
+    /**
+     * return response status code
+     *
+     * @param $url
+     * @return int $status
+     */
+    public function getResponseStatus($url)
+    {
+        try {
+            $response = $this->client->get($url);
+            $status = $response->getStatusCode();
+
+        } catch (BadResponseException $e) {
+            var_dump(Psr7\str($e->getResponse()));
+        }
+//            return $status;
     }
 
     /**
