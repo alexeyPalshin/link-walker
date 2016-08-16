@@ -25,7 +25,7 @@
                 method: "POST",
             })
               .done(function (msg) {
-                if(msg === 'bad uri') {
+                if(msg != 200) {
                     var $toastContent = $('<span>'+msg+'</span>');
                     Materialize.toast($toastContent, 5000, 'col s4 offset-s5');
                 } else {
