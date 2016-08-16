@@ -18,6 +18,20 @@
     (function ($) {
         $('#begin-to-crawl').on('click', function (e) {
             e.preventDefault();
+            let link = $('#link').val();
+
+            $.ajax({
+                url: "/crawl/" + link,
+                method: "POST",
+            })
+              .done(function (msg) {
+                if(msg === 'bad uri') {
+                    var $toastContent = $('<span>'+msg+'</span>');
+                    Materialize.toast($toastContent, 5000, 'col s4 offset-s5');
+                } else {
+                     console.log(msg);
+                }
+            });
         });
     })(jQuery);
 </script>
