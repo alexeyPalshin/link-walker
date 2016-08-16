@@ -18,7 +18,7 @@ class CrawlerController implements CrawlerInterface
     private $dom;
 
     /**
-     * @var array
+     * @var array $pageLinks
      */
     private $pageLinks;
 
@@ -35,39 +35,22 @@ class CrawlerController implements CrawlerInterface
      */
     public function crawl($url)
     {
-        $url = $this->prepareUrl($url);
+        $url = new UrlController($url);
 
-        if (@$this->dom->loadHTMLFile($url)) {
-            $links = $this->dom->getElementsByTagName('a');
-            foreach ($links as $link) {
-                if($this->startsWith($link->getAttribute('href'), 'http')){
-//                    var_dump($link->getAttribute('href'));
+        if($url->isUrlValid()) {
+            if($this->getResponseStatus($url->getUrl()) == 200) {
+                if($url->isUrlValid() && $this->getResponseStatus($url->getUrl()));
+
+                if (@$this->dom->loadHTMLFile($url->getUrl())) {
+                    $links = $this->dom->getElementsByTagName('a');
+                    foreach ($links as $link) {
+                            var_dump($link->getAttribute('href'));
+                        $this->pageLinks[] = $link->getAttribute('href');
+                    }
                 }
-                $this->pageLinks[] = $link->getAttribute('href');
+
+//                echo $this->getPageLinks();
             }
-        }
-
-        echo $this->getPageLinks();
-    }
-
-    /**
-     * Remove all illegal characters from a url & validate url
-     *
-     * @param string $url
-     * @return mixed
-     */
-    public function prepareUrl($url)
-    {
-        $url = filter_var($url, FILTER_SANITIZE_URL);
-        $regex = "/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i";
-        $status = $this->getResponseStatus($url);
-
-        if (filter_var($url, FILTER_VALIDATE_URL) === false || !preg_match($regex, $url)) {
-            echo 'bad uri';
-        } elseif($status != 200) {
-            echo 'bad uri status';
-        } else {
-            return $url;
         }
     }
 
@@ -81,32 +64,12 @@ class CrawlerController implements CrawlerInterface
     {
         try {
             $response = $this->client->get($url);
-            $status = $response->getStatusCode();
-
+            return $response->getStatusCode();
         } catch (BadResponseException $e) {
-            var_dump(Psr7\str($e->getResponse()));
+            echo 'bad response with ' . $e->getResponse()->getStatusCode() . ' status';
         }
-//            return $status;
     }
 
-    /**
-     * Check haystack starts with needle.
-     *
-     * @param string $haystack String to check.
-     * @param string $needle   Check if $haystack start with it
-     *
-     * @return boolean
-     */
-    protected function startsWith($haystack, $needle) {
-        return $needle === "" ||
-        strrpos($haystack, $needle, -strlen($haystack)) !== false;
-    }
-
-//    public function setPageLinks()
-//    {
-//        $this->pageLinks = $this->pageContent->find('pre');
-//    }
-//
     public function getPageLinks()
     {
         return $this->pageLinks;
