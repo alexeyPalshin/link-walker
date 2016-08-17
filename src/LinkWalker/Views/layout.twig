@@ -23,13 +23,23 @@
             $.ajax({
                 url: "/crawl/" + link,
                 method: "POST",
-            })
-              .done(function (msg) {
-                if(msg != 200) {
-                    var $toastContent = $('<span>'+msg+'</span>');
-                    Materialize.toast($toastContent, 5000, 'col s4 offset-s5');
-                } else {
-                     console.log(msg);
+                dataType: 'json',
+                success: function (msg) {
+                    if (typeof msg == "object") {
+                        let html = '';
+                        for(key in msg) {
+                            html += '<tr>'+
+                            '<td>'+key+'</td>'+
+                            '<td>'+msg[key]+'</td>'+
+                            '<td>coming soon...</td>'+
+                            '</tr>';
+                        }
+                        $('#links').show();
+                        $('#links tbody').append(html);
+                    } else {
+                        var $toastContent = $('<span>' + msg + '</span>');
+                        Materialize.toast($toastContent, 5000, 'col s4 offset-s5');
+                    }
                 }
             });
         });

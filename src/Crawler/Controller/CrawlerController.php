@@ -35,6 +35,7 @@ class CrawlerController implements CrawlerInterface
      */
     public function crawl($url)
     {
+        $this->pageLinks = [$url];
         $url = new UrlController($url);
 
         if($url->isUrlValid()) {
@@ -44,13 +45,17 @@ class CrawlerController implements CrawlerInterface
                 if (@$this->dom->loadHTMLFile($url->getUrl())) {
                     $links = $this->dom->getElementsByTagName('a');
                     foreach ($links as $link) {
-                            var_dump($link->getAttribute('href'));
-                        $this->pageLinks[] = $link->getAttribute('href');
+                        $crawledLink = $link->getAttribute('href');
+                        if(!$this->filterUrl($crawledLink) && $this->startsWith($crawledLink, '/')){
+                            $crawledLink = $url->getScheme() . '://' . $url->getHost() . $crawledLink;
+                            $this->pageLinks[] = $crawledLink;
+                        }
                     }
                 }
-
-//                echo $this->getPageLinks();
+                echo $this->getPageLinks();
             }
+        } else {
+            echo 'bad uri';
         }
     }
 
@@ -72,11 +77,34 @@ class CrawlerController implements CrawlerInterface
 
     public function getPageLinks()
     {
-        return $this->pageLinks;
+        return json_encode($this->pageLinks);
     }
-//
-//    public function setPageContent($url)
-//    {
-//        $this->pageContent = $this->dom->file_get_html($url);
-//    }
+
+
+    public function filterUrl($link)
+    {
+        if ($this->startsWith($link, 'javascript:') ||
+            $this->startsWith($link, 'mailto:') ||
+            $this->startsWith($link, 'tel:') ||
+            $this->startsWith($link, '#') ||
+            $link == '') {
+            return;
+        }
+
+        if($this->startsWith($link, '/')) {
+            $link .= $this->scheme . $this->host;
+        }
+    }
+
+    /**
+     * Check haystack starts with needle.
+     *
+     * @param string $haystack String to check.
+     * @param string $needle   Check if $haystack start with it
+     *
+     * @return boolean
+     */
+    protected function startsWith($haystack, $needle) {
+        return strrpos($haystack, $needle, -strlen($haystack)) !== false;
+    }
 }

@@ -90,4 +90,14 @@ class UrlController
     {
         return $this->isValid;
     }
+
+    public function getHost()
+    {
+        return $this->host;
+    }
+
+    public function getScheme()
+    {
+        return $this->scheme;
+    }
 }
