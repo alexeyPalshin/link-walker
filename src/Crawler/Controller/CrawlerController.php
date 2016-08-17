@@ -35,27 +35,27 @@ class CrawlerController implements CrawlerInterface
      */
     public function crawl($url)
     {
-        $this->pageLinks = [$url];
         $url = new UrlController($url);
 
-        if($url->isUrlValid()) {
-            if($this->getResponseStatus($url->getUrl()) == 200) {
-                if($url->isUrlValid() && $this->getResponseStatus($url->getUrl()));
+            if($url->isUrlValid() && $this->getResponseStatus($url->getUrl()) == 200) {
+                $this->pageLinks[] = ['url' => $url->getUrl(), 'status' => '200'];
 
                 if (@$this->dom->loadHTMLFile($url->getUrl())) {
                     $links = $this->dom->getElementsByTagName('a');
                     foreach ($links as $link) {
                         $crawledLink = $link->getAttribute('href');
-                        if(!$this->filterUrl($crawledLink) && $this->startsWith($crawledLink, '/')){
+                        if (!$this->filterUrl($crawledLink) && $this->startsWith($crawledLink, '/')) {
                             $crawledLink = $url->getScheme() . '://' . $url->getHost() . $crawledLink;
-                            $this->pageLinks[] = $crawledLink;
+                            $status = $this->getResponseStatus($crawledLink);
+                            if($status == 200) {
+                                $this->pageLinks[] = ['url' => $crawledLink, 'status' => $status];
+                            }
                         }
                     }
                 }
                 echo $this->getPageLinks();
-            }
         } else {
-            echo 'bad uri';
+            echo json_encode(['badResponse' => 'bad uri']);
         }
     }
 
@@ -71,7 +71,7 @@ class CrawlerController implements CrawlerInterface
             $response = $this->client->get($url);
             return $response->getStatusCode();
         } catch (BadResponseException $e) {
-            echo 'bad response with ' . $e->getResponse()->getStatusCode() . ' status';
+            return 'bad response with ' . $e->getResponse()->getStatusCode() . ' status';
         }
     }
 

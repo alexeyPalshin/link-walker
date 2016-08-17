@@ -25,19 +25,22 @@
                 method: "POST",
                 dataType: 'json',
                 success: function (msg) {
-                    if (typeof msg == "object") {
+                    if (!msg.badResponse) {
                         let html = '';
+                        $('#links tbody').html('');
                         for(key in msg) {
+                            let url = msg[key].url;
+                            let status = msg[key].status;
                             html += '<tr>'+
-                            '<td>'+key+'</td>'+
-                            '<td>'+msg[key]+'</td>'+
-                            '<td>coming soon...</td>'+
+                            '<td>'+(++key)+'</td>'+
+                            '<td>'+url+'</td>'+
+                            '<td>'+status+'</td>'+
                             '</tr>';
                         }
                         $('#links').show();
                         $('#links tbody').append(html);
                     } else {
-                        var $toastContent = $('<span>' + msg + '</span>');
+                        var $toastContent = $('<span>' + msg.badResponse + '</span>');
                         Materialize.toast($toastContent, 5000, 'col s4 offset-s5');
                     }
                 }
