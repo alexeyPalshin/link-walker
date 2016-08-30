@@ -5,12 +5,13 @@ namespace Crawler\Controller;
 
 
 use Crawler\CrawlerInterface;
+use DI\Container;
 use GuzzleHttp\Client;
 use DOMDocument;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\BadResponseException;
 
-class CrawlerController implements CrawlerInterface
+class CrawlerController
 {
     /**
      * @var HtmlDomParser
@@ -22,10 +23,15 @@ class CrawlerController implements CrawlerInterface
      */
     private $pageLinks;
 
-    public function __construct(DOMDocument $dom, Client $client)
+    /**
+     * @var Container
+     */
+    private $container;
+
+    public function __construct(Container $container, DOMDocument $dom)
     {
         $this->dom = $dom;
-        $this->client = $client;
+        $this->container = $container;
     }
 
     /**
@@ -35,43 +41,24 @@ class CrawlerController implements CrawlerInterface
      */
     public function crawl($url)
     {
-        $url = new UrlController($url);
+        $url = new UrlController($this->container, $url);
 
-            if($url->isUrlValid() && $this->getResponseStatus($url->getUrl()) == 200) {
-                $this->pageLinks[] = ['url' => $url->getUrl(), 'status' => '200'];
+            if($url->isUrlValid()) {
+                $this->pageLinks[] = ['url' => $url->getBaseUrl(), 'status' => '200'];
 
-                if (@$this->dom->loadHTMLFile($url->getUrl())) {
+                if (@$this->dom->loadHTMLFile($url->getBaseUrl())) {
                     $links = $this->dom->getElementsByTagName('a');
                     foreach ($links as $link) {
                         $crawledLink = $link->getAttribute('href');
                         if (!$this->filterUrl($crawledLink) && $this->startsWith($crawledLink, '/')) {
                             $crawledLink = $url->getScheme() . '://' . $url->getHost() . $crawledLink;
-                            $status = $this->getResponseStatus($crawledLink);
-                            if($status == 200) {
-                                $this->pageLinks[] = ['url' => $crawledLink, 'status' => $status];
-                            }
+                                $this->pageLinks[] = ['url' => $crawledLink];
                         }
                     }
                 }
                 echo $this->getPageLinks();
         } else {
             echo json_encode(['badResponse' => 'bad uri']);
-        }
-    }
-
-    /**
-     * return response status code
-     *
-     * @param $url
-     * @return int $status
-     */
-    public function getResponseStatus($url)
-    {
-        try {
-            $response = $this->client->get($url);
-            return $response->getStatusCode();
-        } catch (BadResponseException $e) {
-            return 'bad response with ' . $e->getResponse()->getStatusCode() . ' status';
         }
     }
 

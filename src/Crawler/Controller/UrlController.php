@@ -4,7 +4,10 @@
 namespace Crawler\Controller;
 
 
-class UrlController
+use Crawler\CrawlerColleague;
+use DI\Container;
+
+class UrlController extends CrawlerColleague
 {
     /**
      * regex pattern for url validate
@@ -49,13 +52,27 @@ class UrlController
     public $isValid;
 
     /**
-     * UrlController constructor.
-     * @param $url
+     * @var \Crawler\CrawlerInterface
      */
-    public function __construct($url)
+    private $mediator;
+
+    /**
+     * UrlController constructor.
+     * @param Container $container
+     * @param $baseUrl
+     * @throws \DI\NotFoundException
+     */
+    public function __construct(Container $container, $baseUrl)
     {
-        $this->url = filter_var($url, FILTER_SANITIZE_URL);
+        $this->container = $container;
+
+        // TODO: call parent methods without call __construct
+        parent::__construct($this->container->get('CrawlerColleague'));
+
+        $this->baseUrl = filter_var($baseUrl, FILTER_SANITIZE_URL);
         $this->processUrl();
+        $this->mediator = $this->getCrawlerMediator();
+        $this->putUrlToCache($this->baseUrl);
     }
 
     /**
@@ -63,9 +80,9 @@ class UrlController
      */
     public function processUrl()
     {
-        if(filter_var($this->url, FILTER_VALIDATE_URL) && preg_match(self::REGEX, $this->url)) {
+        if(filter_var($this->baseUrl, FILTER_VALIDATE_URL) && preg_match(self::REGEX, $this->baseUrl)) {
             $this->isValid = true;
-            $urlPaths = parse_url($this->url);
+            $urlPaths = parse_url($this->baseUrl);
 
             foreach (['scheme', 'host', 'path', 'port', 'query'] as $path) {
                 if (isset($urlPaths[$path])) {
@@ -75,12 +92,19 @@ class UrlController
         }
     }
 
+    public function putUrlToCache($url)
+    {
+        if(null !== $this->mediator->getFromCache($url)) {
+            $this->mediator->entryCache($url);
+        }
+    }
+
     /**
      * @return mixed|string
      */
-    public function getUrl()
+    public function getBaseUrl()
     {
-        return $this->url;
+        return $this->baseUrl;
     }
 
     /**

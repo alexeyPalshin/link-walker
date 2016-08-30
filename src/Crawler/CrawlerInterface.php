@@ -6,5 +6,7 @@ namespace Crawler;
 
 interface CrawlerInterface
 {
-    public function crawl($url);
+    public function getResponseStatus($url);
+
+    public function entryCache($url);
 }
