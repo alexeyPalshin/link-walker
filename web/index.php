@@ -6,7 +6,7 @@ $container = require __DIR__ . '/../app/bootstrap.php';
 
 $dispatcher = FastRoute\simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/', 'LinkWalker\Controller\HomeController');
-    $r->addRoute(['GET', 'POST'], '/crawl/{url:.+}', ['Crawler\Controller\CrawlerController', 'crawl']);
+    $r->addRoute(['GET', 'POST'], '/crawl/{url:.+}', ['Crawler\Controller\CrawlerController', 'runCrawl']);
 });
 
 // Fetch method and URI from somewhere

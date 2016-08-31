@@ -34,6 +34,11 @@ class CrawlerController
         $this->container = $container;
     }
 
+    public function runCrawl($url)
+    {
+        $this->crawl($url);
+    }
+
     /**
      * crawl url
      *
@@ -50,10 +55,11 @@ class CrawlerController
                     $links = $this->dom->getElementsByTagName('a');
                     foreach ($links as $link) {
                         $crawledLink = $link->getAttribute('href');
-                        if (!$this->filterUrl($crawledLink) && $this->startsWith($crawledLink, '/')) {
-                            $crawledLink = $url->getScheme() . '://' . $url->getHost() . $crawledLink;
-                                $this->pageLinks[] = ['url' => $crawledLink];
-                        }
+                            $linkObj = new LinksController($crawledLink);
+                            if(null === $linkObj->getHost()) {
+                                $crawledLink = $url->getScheme() . '://' . $url->getHost() . '/' . $linkObj->getLink();
+                                $this->pageLinks[] = ['url' => $crawledLink, 'status' => $url->getResponseCode($crawledLink)];
+                            }
                     }
                 }
                 echo $this->getPageLinks();
@@ -65,33 +71,5 @@ class CrawlerController
     public function getPageLinks()
     {
         return json_encode($this->pageLinks);
-    }
-
-
-    public function filterUrl($link)
-    {
-        if ($this->startsWith($link, 'javascript:') ||
-            $this->startsWith($link, 'mailto:') ||
-            $this->startsWith($link, 'tel:') ||
-            $this->startsWith($link, '#') ||
-            $link == '') {
-            return;
-        }
-
-        if($this->startsWith($link, '/')) {
-            $link .= $this->scheme . $this->host;
-        }
-    }
-
-    /**
-     * Check haystack starts with needle.
-     *
-     * @param string $haystack String to check.
-     * @param string $needle   Check if $haystack start with it
-     *
-     * @return boolean
-     */
-    protected function startsWith($haystack, $needle) {
-        return strrpos($haystack, $needle, -strlen($haystack)) !== false;
     }
 }

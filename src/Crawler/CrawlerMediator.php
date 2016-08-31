@@ -4,6 +4,7 @@ namespace Crawler;
 
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class CrawlerMediator implements CrawlerInterface
 {
@@ -23,8 +24,12 @@ class CrawlerMediator implements CrawlerInterface
 
     public function getResponseStatus($url)
     {
-        $response = $this->client->get($url);
-        return $response->getStatusCode();
+        try{
+            $response = $this->client->get($url);
+            return $response->getStatusCode();
+        } catch (ClientException $e) {
+            return $e->getResponse()->getStatusCode();
+        }
     }
 
     public function getFromCache($url)

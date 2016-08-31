@@ -18,7 +18,7 @@ class UrlController extends CrawlerColleague
     /**
      * @var string
      */
-    public $url;
+    public $baseUrl;
 
     /**
      * @var null|string
@@ -56,6 +56,8 @@ class UrlController extends CrawlerColleague
      */
     private $mediator;
 
+    private $container;
+
     /**
      * UrlController constructor.
      * @param Container $container
@@ -70,19 +72,20 @@ class UrlController extends CrawlerColleague
         parent::__construct($this->container->get('CrawlerColleague'));
 
         $this->baseUrl = filter_var($baseUrl, FILTER_SANITIZE_URL);
-        $this->processUrl();
+        $this->processUrl($this->baseUrl);
         $this->mediator = $this->getCrawlerMediator();
         $this->putUrlToCache($this->baseUrl);
     }
 
     /**
      * Remove all illegal characters from a url & validate url
+     * @param $url
      */
-    public function processUrl()
+    public function processUrl($url)
     {
-        if(filter_var($this->baseUrl, FILTER_VALIDATE_URL) && preg_match(self::REGEX, $this->baseUrl)) {
+        if(filter_var($url, FILTER_VALIDATE_URL) && preg_match(self::REGEX, $url)) {
             $this->isValid = true;
-            $urlPaths = parse_url($this->baseUrl);
+            $urlPaths = parse_url($url);
 
             foreach (['scheme', 'host', 'path', 'port', 'query'] as $path) {
                 if (isset($urlPaths[$path])) {
@@ -90,6 +93,12 @@ class UrlController extends CrawlerColleague
                 }
             }
         }
+    }
+
+    public function getResponseCode($url)
+    {
+        $code = $this->mediator->getResponseStatus($url);
+        return $code;
     }
 
     public function putUrlToCache($url)
@@ -123,5 +132,10 @@ class UrlController extends CrawlerColleague
     public function getScheme()
     {
         return $this->scheme;
+    }
+
+    public function getPath()
+    {
+        return $this->path;
     }
 }
