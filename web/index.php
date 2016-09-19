@@ -6,14 +6,12 @@ $container = require __DIR__ . '/../app/bootstrap.php';
 
 $dispatcher = FastRoute\simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/', 'LinkWalker\Controller\HomeController');
-    $r->addRoute(['GET', 'POST'], '/crawl/{url:.+}', ['Crawler\Controller\CrawlerController', 'crawl']);
+    $r->addRoute(['GET', 'POST'], '/crawl/{settings:.+}', ['LinkWalker\Controller\HomeController', 'doCrawl']);
 });
 
-// Fetch method and URI from somewhere
 $httpMethod = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
 
-// Strip query string (?foo=bar) and decode URI
 if (false !== $pos = strpos($uri, '?')) {
     $uri = substr($uri, 0, $pos);
 }

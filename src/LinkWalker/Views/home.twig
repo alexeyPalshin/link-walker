@@ -31,10 +31,34 @@
             <th data-field="status">STATUS</th>
         </tr>
         </thead>
-
         <tbody>
 
         </tbody>
     </table>
-
+    <div class="fixed-action-btn" style="bottom: 45px; right: 24px;">
+        <a href="#modal-settings" class="modal-trigger btn-floating btn-large orange">
+            <i class="large material-icons">settings</i>
+        </a>
+    </div>
+    <!-- Modal Structure -->
+    <div id="modal-settings" class="modal bottom-sheet">
+        <div class="modal-content">
+            <h4>Настройки</h4>
+            <div class="row">
+                <form id="crawler-settings" class="col s12">
+                    <div class="input-field col s6">
+                        <input placeholder="Узел" id="node" type="text" class="validate">
+                        <label for="node">Узел</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <input placeholder="Глубина" id="depth" type="text" class="validate">
+                        <label for="depth">Глубина</label>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class=" modal-action modal-close waves-effect waves-orange btn-flat">Настроено</a>
+        </div>
+    </div>
 {% endblock %}

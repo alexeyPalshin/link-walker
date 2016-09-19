@@ -4,6 +4,21 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
+    <style type="text/css">
+        .lean-overlay {
+            position: fixed;
+            z-index: 999;
+            top: -100px;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            height: 125%;
+            width: 100%;
+            background: #000;
+            display: none;
+            will-change: opacity;
+        }
+    </style>
 </head>
 <body>
 
@@ -14,14 +29,23 @@
 <!-- Compiled and minified JavaScript -->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <script type="text/javascript">
     (function ($) {
         $('#begin-to-crawl').on('click', function (e) {
             e.preventDefault();
             let link = $('#link').val();
+            let settings = document.getElementById('crawly').getAttribute('data-settings');
+            if(settings != null) {
+                var set = JSON.parse(settings);
+                set.link = link;
+                set = JSON.stringify(set);
+            } else {
+                var set = link;
+            }
 
             $.ajax({
-                url: "/crawl/" + link,
+                url: "/crawl/" + set,
                 method: "POST",
                 dataType: 'json',
                 success: function (msg) {
@@ -46,6 +70,25 @@
                 }
             });
         });
+
+        // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+        $('.modal-trigger').leanModal({
+                    dismissible: true, // Modal can be dismissed by clicking outside of the modal
+                    opacity: .5, // Opacity of modal background
+                    in_duration: 300, // Transition in duration
+                    out_duration: 200, // Transition out duration
+                    starting_top: '10%', // Starting top style attribute
+                    ending_top: '10%', // Ending top style attribute
+                    ready: function() {}, // Callback for Modal open
+                    complete: function() {
+                        let node = $('#node').val();
+                        let depth = $('#depth').val();
+                        let settings = JSON.stringify({node: node, depth: depth});
+                        document.getElementById('crawly').setAttribute('data-settings', settings);
+                    } // Callback for Modal close
+                }
+        );
+
     })(jQuery);
 </script>
 </body>

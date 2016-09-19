@@ -10,7 +10,7 @@ use DOMDocument;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\BadResponseException;
 
-class CrawlerController implements CrawlerInterface
+class CrawlerController
 {
     /**
      * @var HtmlDomParser
