@@ -38,16 +38,28 @@ class HomeController
     public function doCrawl($settings)
     {
         $this->prepareSettings($settings);
-        $this->crawler->crawl($this->getSettingValue('link'));
+        $this->crawler->crawl($this->getSettingValue('link'), $this->settings);
     }
 
     /**
+     * sanitize incoming settings
      * @param $settings
      *
      */
     public function prepareSettings($settings)
     {
-        $this->settings = json_decode($settings, 1);
+        $args = [
+            'link' => FILTER_SANITIZE_URL,
+            'depth' => [
+                'filter'    => FILTER_VALIDATE_INT,
+                'flags'     => FILTER_FORCE_ARRAY,
+                'options'   => ['min_range' => 1, 'max_range' => 10]
+            ],
+            'node' => FILTER_SANITIZE_STRING
+        ];
+        $settingsNotSanitized = json_decode($settings, 1);
+
+        $this->settings = filter_var_array($settingsNotSanitized, $args);
     }
 
     /**

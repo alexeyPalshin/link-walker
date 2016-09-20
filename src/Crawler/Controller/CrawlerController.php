@@ -33,8 +33,9 @@ class CrawlerController
      *
      * @param string $url
      */
-    public function crawl($url)
+    public function crawl($url, $settings = null)
     {
+
         $url = new UrlController($url);
 
             if($url->isUrlValid() && $this->getResponseStatus($url->getUrl()) == 200) {
